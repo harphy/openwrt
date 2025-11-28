@@ -1935,6 +1935,17 @@ define Device/librelink_ac05
 endef
 TARGET_DEVICES += librelink_ac05
 
+define Device/librelink_ap01
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 16000k
+  DEVICE_VENDOR := LibreLink
+  DEVICE_MODEL := AP01
+  DEVICE_PACKAGES := kmod-mmc-mtk kmod-mt76x2 kmod-usb3 \
+	-wpad-basic-mbedtls -uboot-envtools
+endef
+TARGET_DEVICES += librelink_ap01
+
 define Device/linksys_e5600
   $(Device/nand)
   $(Device/uimage-lzma-loader)
