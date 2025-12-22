@@ -2047,8 +2047,7 @@ define Device/librelink_ac05
   IMAGE_SIZE := 16000k
   DEVICE_VENDOR := LibreLink
   DEVICE_MODEL := AC05
-  DEVICE_PACKAGES := kmod-mmc-mtk kmod-mt76x2 kmod-usb3 \
-	-wpad-basic-mbedtls -uboot-envtools
+  DEVICE_PACKAGES := -uboot-envtools
 endef
 TARGET_DEVICES += librelink_ac05
 
@@ -2058,7 +2057,7 @@ define Device/librelink_ap01
   IMAGE_SIZE := 16000k
   DEVICE_VENDOR := LibreLink
   DEVICE_MODEL := AP01
-  DEVICE_PACKAGES := kmod-mmc-mtk kmod-mt76x2 kmod-usb3 \
+  DEVICE_PACKAGES := kmod-mt7615-firmware \
 	-wpad-basic-mbedtls -uboot-envtools
 endef
 TARGET_DEVICES += librelink_ap01
