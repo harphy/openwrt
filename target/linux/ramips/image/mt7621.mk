@@ -2057,8 +2057,8 @@ define Device/librelink_ap01
   IMAGE_SIZE := 16000k
   DEVICE_VENDOR := LibreLink
   DEVICE_MODEL := AP01
-  DEVICE_PACKAGES := kmod-mt7615-firmware \
-	-wpad-basic-mbedtls -uboot-envtools
+  DEVICE_PACKAGES := kmod-mt7615-firmware kmod-mt7615e \
+	wpad-basic-mbedtls -uboot-envtools
 endef
 TARGET_DEVICES += librelink_ap01
 
