@@ -3384,10 +3384,14 @@ define Device/librelink_ap02
   DEVICE_DTS_DIR := ../dts
   DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-phy-motorcomm
   IMAGES := sysupgrade.bin
+  KERNEL_INITRAMFS_SUFFIX := -recovery.itb
   KERNEL := kernel-bin | lzma | \
 	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb
   KERNEL_INITRAMFS := kernel-bin | lzma | \
 	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb with-initrd | pad-to 64k
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  ARTIFACTS := preloader.bin bl31-uboot.fip
+  ARTIFACT/preloader.bin := mt7981-bl2 spim-nand-ddr3
+  ARTIFACT/bl31-uboot.fip := mt7981-bl31-uboot librelink_ap02
 endef
 TARGET_DEVICES += librelink_ap02
