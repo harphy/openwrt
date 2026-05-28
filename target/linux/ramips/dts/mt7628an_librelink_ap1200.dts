@@ -1,0 +1,45 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+#include "mt7628an_asus_rt-ac1200.dtsi"
+
+/ {
+	compatible = "librelink,ap1200", "mediatek,mt7628an-soc";
+	model = "LibreLink AP1200";
+
+	chosen {
+		bootargs = "console=ttyS0,115200";
+	};
+};
+
+&eeprom_factory_8000 {
+	reg = <0x8000 0x4da8>;
+};
+
+&state_default {
+	spis {
+		groups = "spis";
+		function = "spis";
+	};
+
+	gpio {
+		groups = "refclk", "i2c", "wled_an";
+		function = "gpio";
+	};
+};
+
+&usbphy {
+	status = "disabled";
+};
+
+&ehci {
+	status = "disabled";
+};
+
+&ohci {
+	status = "disabled";
+};
+
+&esw {
+	mediatek,portmap = <0x2f>;
+	mediatek,portdisable = <0x2d>;
+};
