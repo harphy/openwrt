@@ -759,11 +759,11 @@ define U-Boot/mt7981_wavlink_wl-wnt100x3
   DEPENDS:=+trusted-firmware-a-mt7981-spim-nand-ddr3
 endef
 
-define U-Boot/mt7981_librelink_ap02
-  NAME:=LibreLink AP02
+define U-Boot/mt7981_librelink_ap3000
+  NAME:=LibreLink AP3000
   BUILD_SUBTARGET:=filogic
-  BUILD_DEVICES:=librelink_ap02
-  UBOOT_CONFIG:=mt7981_librelink_ap02
+  BUILD_DEVICES:=librelink_ap3000
+  UBOOT_CONFIG:=mt7981_librelink_ap3000
   UBOOT_IMAGE:=u-boot.fip
   BL2_BOOTDEV:=spim-nand
   BL2_SOC:=mt7981
@@ -1354,7 +1354,7 @@ UBOOT_TARGETS := \
 	mt7981_snr_snr-cpe-ax2 \
 	mt7981_teralink_tl3020-256mb \
 	mt7981_wavlink_wl-wnt100x3 \
-	mt7981_librelink_ap02 \
+	mt7981_librelink_ap3000 \
 	mt7981_xiaomi_mi-router-ax3000t \
 	mt7981_xiaomi_mi-router-wr30u \
 	mt7986_acer_predator-w6x \
