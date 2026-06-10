@@ -1,0 +1,209 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+
+/dts-v1/;
+#include "mt7987b.dtsi"
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/leds/common.h>
+
+/ {
+	model = "LibreLink BE3600";
+	compatible = "librelink,be3600",
+		     "mediatek,mt7987b",
+		     "mediatek,mt7987";
+
+	aliases {
+		serial0 = &uart0;
+		label-mac-device = &gmac1;
+		led-boot = &led_green;
+		led-failsafe = &led_green;
+		led-running = &led_green;
+		led-upgrade = &led_green;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,115200n1 \
+			    earlycon=uart8250,mmio32,0x11000000 \
+			    pci=pcie_bus_perf";
+		rootdisk = <&ubi_fit>;
+		stdout-path = "serial0:115200n8";
+	};
+
+	memory@40000000 {
+		device_type = "memory";
+		reg = <0x0 0x40000000 0x0 0x20000000>;
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		reset {
+			label = "reset";
+			linux,code = <KEY_RESTART>;
+			gpios = <&pio 1 GPIO_ACTIVE_LOW>;
+			debounce-interval = <10>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led_red: led-0 {
+			color = <LED_COLOR_ID_RED>;
+			function = LED_FUNCTION_STATUS;
+			gpios = <&pio 8 GPIO_ACTIVE_LOW>;
+		};
+
+		led_green: led-1 {
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_STATUS;
+			gpios = <&pio 9 GPIO_ACTIVE_LOW>;
+		};
+	};
+};
+
+&gmac1 {
+	openwrt,netdev-name = "wan";
+	phy-mode = "internal";
+	phy-handle = <&phy15>;
+	status = "okay";
+};
+
+&gmac2 {
+	openwrt,netdev-name = "lan";
+	phy-mode = "sgmii";
+	phy-handle = <&an8801_lan>;
+	managed = "in-band-status";
+	status = "okay";
+};
+
+&mdio {
+	phy15: phy@15 {
+		compatible = "ethernet-phy-ieee802.3-c45";
+		reg = <15>;
+
+		pinctrl-0 = <&i2p5gbe_led0_pins>;
+		pinctrl-names = "i2p5gbe-led";
+	};
+
+	an8801_lan: ethernet-phy@24 {
+		/*
+		 * BE3600 LAN can use AN8801S/EN8801S or AN8801/AN8801SB.
+		 * Keep this as a probed C22 PHY so mounted alternatives such as
+		 * YT8531A can bind to their native driver when present.
+		 */
+		compatible = "ethernet-phy-ieee802.3-c22";
+		reg = <24>;
+		phy-mode = "sgmii";
+		reset-gpios = <&pio 42 GPIO_ACTIVE_LOW>;
+		reset-assert-us = <10000>;
+		reset-deassert-us = <10000>;
+		eee-broken-100tx;
+		eee-broken-1000t;
+	};
+};
+
+&pcie0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pcie0_pins>;
+	status = "okay";
+
+	pcie@0,0 {
+		reg = <0x0000 0 0 0 0>;
+		#address-cells = <3>;
+		#size-cells = <2>;
+
+		mt7990@0,0 {
+			compatible = "mediatek,mt76";
+			reg = <0x0000 0 0 0 0>;
+			device_type = "pci";
+		};
+	};
+};
+
+&pcie1 {
+	status = "disabled";
+};
+
+&spi0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi0_flash_pins>;
+	status = "okay";
+
+	spi_nand: flash@0 {
+		compatible = "spi-nand";
+		reg = <0>;
+		spi-max-frequency = <52000000>;
+		spi-tx-bus-width = <4>;
+		spi-rx-bus-width = <4>;
+		mediatek,nmbm;
+		mediatek,bmt-max-ratio = <1>;
+		mediatek,bmt-max-reserved-blocks = <64>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "BL2";
+				reg = <0x00000 0x0100000>;
+				read-only;
+			};
+
+			partition@100000 {
+				label = "u-boot-env";
+				reg = <0x0100000 0x0080000>;
+			};
+
+			factory: partition@180000 {
+				label = "Factory";
+				reg = <0x180000 0x0200000>;
+			};
+
+			partition@380000 {
+				label = "FIP";
+				reg = <0x380000 0x0200000>;
+			};
+
+			partition@580000 {
+				label = "ubi";
+				reg = <0x0580000 0x07280000>;
+				compatible = "linux,ubi";
+
+				volumes {
+					ubi_env: ubi-volume-ubootenv {
+						volname = "ubootenv";
+					};
+
+					ubi_env2: ubi-volume-ubootenv2 {
+						volname = "ubootenv2";
+					};
+
+					ubi_fit: ubi-volume-fit {
+						volname = "fit";
+					};
+				};
+			};
+		};
+	};
+};
+
+&uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart0_pins>;
+	status = "okay";
+};
+
+&ubi_env {
+	nvmem-layout {
+		compatible = "u-boot,env-redundant-bool-layout";
+	};
+};
+
+&ubi_env2 {
+	nvmem-layout {
+		compatible = "u-boot,env-redundant-bool-layout";
+	};
+};

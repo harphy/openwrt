@@ -3885,3 +3885,30 @@ define Device/librelink_ap3000
   ARTIFACT/bl31-uboot.fip := mt7981-bl31-uboot librelink_ap3000
 endef
 TARGET_DEVICES += librelink_ap3000
+
+define Device/librelink_be3600
+  DEVICE_VENDOR := LibreLink
+  DEVICE_MODEL := BE3600
+  DEVICE_DTS := mt7987b-librelink-be3600
+  DEVICE_DTS_DIR := ../dts
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_IN_UBI := 1
+  UBOOTENV_IN_UBI := 1
+  IMAGES := sysupgrade.itb
+  KERNEL_INITRAMFS_SUFFIX := -recovery.itb
+  KERNEL_LOADADDR := 0x40000000
+  KERNEL := kernel-bin | gzip
+  KERNEL_INITRAMFS := kernel-bin | lzma | \
+	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb with-initrd | \
+	pad-to 64k
+  IMAGE/sysupgrade.itb := append-kernel | \
+	fit gzip $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb external-with-rootfs | \
+	pad-rootfs | append-metadata
+  DEVICE_PACKAGES := mt7987-2p5g-phy-firmware kmod-mt7990-firmware kmod-phy-motorcomm
+  ARTIFACTS := preloader.bin bl31-uboot.fip
+  ARTIFACT/preloader.bin := mt7987-bl2 spim-nand0
+  ARTIFACT/bl31-uboot.fip := mt7987-bl31-uboot librelink_be3600
+endef
+TARGET_DEVICES += librelink_be3600
