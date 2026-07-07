@@ -2066,26 +2066,26 @@ define Device/lenovo_newifi-d1
 endef
 TARGET_DEVICES += lenovo_newifi-d1
 
-define Device/librelink_ac05
+define Device/librelink_g5
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
   IMAGE_SIZE := 16000k
   DEVICE_VENDOR := LibreLink
-  DEVICE_MODEL := AC05
+  DEVICE_MODEL := Gateway G5
   DEVICE_PACKAGES := -uboot-envtools
 endef
-TARGET_DEVICES += librelink_ac05
+TARGET_DEVICES += librelink_g5
 
-define Device/librelink_ap1300
+define Device/librelink_ac1300_pro
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
   IMAGE_SIZE := 16000k
   DEVICE_VENDOR := LibreLink
-  DEVICE_MODEL := AP1300
+  DEVICE_MODEL := AC1300 Pro
   DEVICE_PACKAGES := kmod-mt7615-firmware kmod-mt7615e \
 	wpad-basic-mbedtls -uboot-envtools
 endef
-TARGET_DEVICES += librelink_ap1300
+TARGET_DEVICES += librelink_ac1300_pro
 
 define Device/linksys_e5600
   $(Device/nand)

@@ -84,7 +84,7 @@ ramips_setup_interfaces()
 	humax,e10|\
 	keenetic,kn-3510|\
 	maginon,mc-1200ac|\
-	librelink,ap1300|\
+	librelink,ac1300pro|\
 	meig,slt866|\
 	openfi,5pro|\
 	wavlink,ws-wn572hp3-4g|\

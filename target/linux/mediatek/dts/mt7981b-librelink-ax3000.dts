@@ -5,8 +5,8 @@
 #include "mt7981b.dtsi"
 
 / {
-        model = "LibreLink AP3000";
-        compatible = "librelink,ap3000", "mediatek,mt7981";
+        model = "LibreLink AX3000";
+        compatible = "librelink,ax3000", "mediatek,mt7981";
 
         aliases {
                 serial0 = &uart0;

@@ -3867,10 +3867,10 @@ endif
 endef
 TARGET_DEVICES += zyxel_wx5600-t0-ubootmod
 
-define Device/librelink_ap3000
+define Device/librelink_ax3000
   DEVICE_VENDOR := LibreLink
-  DEVICE_MODEL := AP3000
-  DEVICE_DTS := mt7981b-librelink-ap3000
+  DEVICE_MODEL := AX3000
+  DEVICE_DTS := mt7981b-librelink-ax3000
   DEVICE_DTS_DIR := ../dts
   DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-phy-motorcomm
   IMAGES := sysupgrade.bin
@@ -3882,9 +3882,9 @@ define Device/librelink_ap3000
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
   ARTIFACTS := preloader.bin bl31-uboot.fip
   ARTIFACT/preloader.bin := mt7981-bl2 spim-nand-ddr3
-  ARTIFACT/bl31-uboot.fip := mt7981-bl31-uboot librelink_ap3000
+  ARTIFACT/bl31-uboot.fip := mt7981-bl31-uboot librelink_ax3000
 endef
-TARGET_DEVICES += librelink_ap3000
+TARGET_DEVICES += librelink_ax3000
 
 define Device/librelink_be3600
   DEVICE_VENDOR := LibreLink

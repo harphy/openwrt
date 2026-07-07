@@ -6,8 +6,8 @@
 #include <dt-bindings/input/input.h>
 
 / {
-	compatible = "librelink,ap1300", "mediatek,mt7621-soc";
-	model = "LibreLink AP1300";
+	compatible = "librelink,ac1300pro", "mediatek,mt7621-soc";
+	model = "LibreLink AC1300 Pro";
 
 	aliases {
 		label-mac-device = &gmac0;

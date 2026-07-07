@@ -84,6 +84,24 @@ define U-Boot/mt7621_zbtlink_zbt-wg3526-16m
   UBOOT_IMAGE:=u-boot-mt7621.bin
 endef
 
+define U-Boot/mt7621_librelink_g5
+  NAME:=LibreLink Gateway G5
+  UBOOT_CONFIG:=mt7621_rfb
+  BUILD_DEVICES:=librelink_g5
+  BUILD_TARGET:=ramips
+  BUILD_SUBTARGET:=mt7621
+  UBOOT_IMAGE:=u-boot-mt7621.bin
+endef
+
+define U-Boot/mt7621_librelink_ac1300_pro
+  NAME:=LibreLink AC1300 Pro
+  UBOOT_CONFIG:=mt7621_rfb
+  BUILD_DEVICES:=librelink_ac1300_pro
+  BUILD_TARGET:=ramips
+  BUILD_SUBTARGET:=mt7621
+  UBOOT_IMAGE:=u-boot-mt7621.bin
+endef
+
 define U-Boot/mt7622_rfb1
   NAME:=MT7622 Reference Board 1
   UBOOT_CONFIG:=mt7622_rfb
@@ -210,6 +228,24 @@ define U-Boot/mt7628_ravpower_rp-wd009
   BUILD_SUBTARGET:=mt76x8
   UBOOT_CONFIG:=ravpower-rp-wd009-ram
   UBOOT_IMAGE:=u-boot.bin
+endef
+
+define U-Boot/mt7628_librelink_ac1200
+  NAME:=LibreLink AC1200
+  BUILD_TARGET:=ramips
+  BUILD_SUBTARGET:=mt76x8
+  BUILD_DEVICES:=librelink_ac1200
+  UBOOT_CONFIG:=mt7628_rfb
+  UBOOT_IMAGE:=u-boot-with-spl.bin
+endef
+
+define U-Boot/mt7628_librelink_n300
+  NAME:=LibreLink N300
+  BUILD_TARGET:=ramips
+  BUILD_SUBTARGET:=mt76x8
+  BUILD_DEVICES:=librelink_n300
+  UBOOT_CONFIG:=mt7628_rfb
+  UBOOT_IMAGE:=u-boot-with-spl.bin
 endef
 
 define U-Boot/mt7629_rfb
@@ -759,11 +795,11 @@ define U-Boot/mt7981_wavlink_wl-wnt100x3
   DEPENDS:=+trusted-firmware-a-mt7981-spim-nand-ddr3
 endef
 
-define U-Boot/mt7981_librelink_ap3000
-  NAME:=LibreLink AP3000
+define U-Boot/mt7981_librelink_ax3000
+  NAME:=LibreLink AX3000
   BUILD_SUBTARGET:=filogic
-  BUILD_DEVICES:=librelink_ap3000
-  UBOOT_CONFIG:=mt7981_librelink_ap3000
+  BUILD_DEVICES:=librelink_ax3000
+  UBOOT_CONFIG:=mt7981_librelink_ax3000
   UBOOT_IMAGE:=u-boot.fip
   BL2_BOOTDEV:=spim-nand
   BL2_SOC:=mt7981
@@ -1306,6 +1342,8 @@ UBOOT_TARGETS := \
 	mt7621_nand_rfb \
 	mt7621_rfb \
 	mt7621_zbtlink_zbt-wg3526-16m \
+	mt7621_librelink_g5 \
+	mt7621_librelink_ac1300_pro \
 	mt7622_bananapi_bpi-r64-emmc \
 	mt7622_bananapi_bpi-r64-sdmmc \
 	mt7622_bananapi_bpi-r64-snand \
@@ -1319,6 +1357,8 @@ UBOOT_TARGETS := \
 	mt7623a_unielec_u7623 \
 	mt7628_rfb \
 	mt7628_ravpower_rp-wd009 \
+	mt7628_librelink_ac1200 \
+	mt7628_librelink_n300 \
 	mt7629_rfb \
 	mt7981_abt_asr3000 \
 	mt7981_bazis-ax3000wm \
@@ -1365,7 +1405,7 @@ UBOOT_TARGETS := \
 	mt7981_snr_snr-cpe-ax2 \
 	mt7981_teralink_tl3020-256mb \
 	mt7981_wavlink_wl-wnt100x3 \
-	mt7981_librelink_ap3000 \
+	mt7981_librelink_ax3000 \
 	mt7981_xiaomi_mi-router-ax3000t \
 	mt7981_xiaomi_mi-router-wr30u \
 	mt7986_acer_predator-w6x \
@@ -1445,6 +1485,10 @@ endif
 define Build/Configure
 	$(call Build/Configure/U-Boot)
 	sed -i 's/CONFIG_TOOLS_LIBCRYPTO=y/# CONFIG_TOOLS_LIBCRYPTO is not set/' $(PKG_BUILD_DIR)/.config
+	$(if $(findstring librelink,$(BUILD_VARIANT)), \
+		$(PKG_BUILD_DIR)/scripts/config --file $(PKG_BUILD_DIR)/.config --set-val CONFIG_BAUDRATE 115200 ;)
+	$(if $(findstring librelink,$(BUILD_VARIANT)), \
+		+$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) CROSS_COMPILE=$(TARGET_CROSS) $(UBOOT_CONFIGURE_VARS) oldconfig)
 endef
 
 define Build/Compile

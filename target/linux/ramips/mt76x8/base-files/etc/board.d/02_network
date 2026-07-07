@@ -171,9 +171,13 @@ ramips_setup_interfaces()
 		ucidef_add_switch "switch0" \
 			"0:lan:1" "1:lan:2" "2:lan:3" "3:lan:4" "4:wan" "6@eth0"
 		;;
-	librelink,ap1200)
+	librelink,ac1200)
 		ucidef_add_switch "switch0" \
 			"0:lan" "1:lan" "2:lan" "3:wan" "6@eth0"
+		;;
+	librelink,n300)
+		ucidef_add_switch "switch0" \
+			"1:lan" "4:wan" "6@eth0"
 		;;
 	mercusys,mb130-4g-v1)
 		ucidef_add_switch "switch0" \

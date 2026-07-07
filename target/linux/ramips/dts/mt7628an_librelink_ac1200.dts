@@ -6,8 +6,8 @@
 #include <dt-bindings/input/input.h>
 
 / {
-	compatible = "librelink,ap1200", "mediatek,mt7628an-soc";
-	model = "LibreLink AP1200";
+	compatible = "librelink,ac1200", "mediatek,mt7628an-soc";
+	model = "LibreLink AC1200";
 
 	aliases {
 		label-mac-device = &ethernet;
@@ -18,7 +18,7 @@
 	};
 
 	chosen {
-		bootargs = "console=ttyS0,57600";
+		bootargs = "console=ttyS0,115200";
 	};
 
 	gpio-leds {

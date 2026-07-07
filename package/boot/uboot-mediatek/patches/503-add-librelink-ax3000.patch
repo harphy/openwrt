@@ -1,5 +1,5 @@
 --- /dev/null
-+++ b/configs/mt7981_librelink_ap3000_defconfig
++++ b/configs/mt7981_librelink_ax3000_defconfig
 @@ -0,0 +1,107 @@
 +CONFIG_ARM=y
 +CONFIG_SYS_HAS_NONCACHED_MEMORY=y
@@ -8,7 +8,7 @@
 +CONFIG_TEXT_BASE=0x41e00000
 +CONFIG_SYS_MALLOC_F_LEN=0x4000
 +CONFIG_NR_DRAM_BANKS=1
-+CONFIG_DEFAULT_DEVICE_TREE="mt7981-librelink_ap3000"
++CONFIG_DEFAULT_DEVICE_TREE="mt7981-librelink_ax3000"
 +CONFIG_OF_LIBFDT_OVERLAY=y
 +CONFIG_TARGET_MT7981=y
 +CONFIG_SYS_LOAD_ADDR=0x46000000
@@ -20,7 +20,7 @@
 +CONFIG_BOOTDELAY=30
 +CONFIG_AUTOBOOT_KEYED=y
 +CONFIG_AUTOBOOT_MENU_SHOW=y
-+CONFIG_DEFAULT_FDT_FILE="mediatek/mt7981-librelink_ap3000.dtb"
++CONFIG_DEFAULT_FDT_FILE="mediatek/mt7981-librelink_ax3000.dtb"
 +CONFIG_LOGLEVEL=7
 +CONFIG_PRE_CONSOLE_BUFFER=y
 +CONFIG_LOG=y
@@ -66,7 +66,7 @@
 +CONFIG_ENV_UBI_VOLUME_REDUND="ubootenv2"
 +CONFIG_ENV_RELOC_GD_ENV_ADDR=y
 +CONFIG_ENV_USE_DEFAULT_ENV_TEXT_FILE=y
-+CONFIG_ENV_DEFAULT_ENV_TEXT_FILE="defenvs/librelink_ap3000_env"
++CONFIG_ENV_DEFAULT_ENV_TEXT_FILE="defenvs/librelink_ax3000_env"
 +CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG=y
 +CONFIG_VERSION_VARIABLE=y
 +CONFIG_NETCONSOLE=y
@@ -109,7 +109,7 @@
 +CONFIG_ZSTD=y
 +CONFIG_HEXDUMP=y
 --- /dev/null
-+++ b/arch/arm/dts/mt7981-librelink_ap3000.dts
++++ b/arch/arm/dts/mt7981-librelink_ax3000.dts
 @@ -0,0 +1,158 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
@@ -125,8 +125,8 @@
 +/ {
 +	#address-cells = <1>;
 +	#size-cells = <1>;
-+	model = "LibreLink AP3000";
-+	compatible = "librelink,ap3000", "mediatek,mt7981";
++	model = "LibreLink AX3000";
++	compatible = "librelink,ax3000", "mediatek,mt7981";
 +
 +	chosen {
 +		stdout-path = &uart0;
@@ -270,7 +270,7 @@
 +	status = "disabled";
 +};
 --- /dev/null
-+++ b/defenvs/librelink_ap3000_env
++++ b/defenvs/librelink_ax3000_env
 @@ -0,0 +1,58 @@
 +ipaddr=192.168.1.1
 +serverip=192.168.1.254
@@ -279,10 +279,10 @@
 +bootcmd=run check_buttons ; if pstore check ; then run boot_recovery ; else run boot_ubi ; fi
 +bootconf=config-1
 +bootdelay=0
-+bootfile=openwrt-mediatek-filogic-librelink_ap3000-initramfs-recovery.itb
-+bootfile_bl2=openwrt-mediatek-filogic-librelink_ap3000-preloader.bin
-+bootfile_fip=openwrt-mediatek-filogic-librelink_ap3000-bl31-uboot.fip
-+bootfile_upg=openwrt-mediatek-filogic-librelink_ap3000-squashfs-sysupgrade.bin
++bootfile=openwrt-mediatek-filogic-librelink_ax3000-initramfs-recovery.itb
++bootfile_bl2=openwrt-mediatek-filogic-librelink_ax3000-preloader.bin
++bootfile_fip=openwrt-mediatek-filogic-librelink_ax3000-bl31-uboot.fip
++bootfile_upg=openwrt-mediatek-filogic-librelink_ax3000-squashfs-sysupgrade.bin
 +bootled_pwr=green
 +bootled_rec=green
 +bootmenu_confirm_return=askenv - Press ENTER to return to menu ; bootmenu 60
