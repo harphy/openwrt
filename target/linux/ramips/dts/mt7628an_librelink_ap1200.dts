@@ -18,7 +18,7 @@
 	};
 
 	chosen {
-		bootargs = "console=ttyS0,115200";
+		bootargs = "console=ttyS0,57600";
 	};
 
 	gpio-leds {
@@ -127,8 +127,8 @@
 };
 
 &esw {
-	mediatek,portmap = <0x2f>;
-	mediatek,portdisable = <0x2d>;
+	mediatek,portmap = <0x37>;
+	mediatek,portdisable = <0x30>;
 };
 
 &wmac {
