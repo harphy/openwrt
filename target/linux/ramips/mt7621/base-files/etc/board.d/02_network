@@ -94,6 +94,9 @@ ramips_setup_interfaces()
 	zyxel,nr7101)
 		ucidef_set_interfaces_lan_wan "lan" "wan"
 		;;
+	librelink,g9)
+		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4 lan5 lan6 lan7 lan8" "wan"
+		;;
 	asiarf,ap7621-nv1|\
 	beeline,smartbox-flash|\
 	beeline,smartbox-giga|\
@@ -332,6 +335,11 @@ ramips_setup_macs()
 	netgear,wax202)
 		lan_mac=$(mtd_get_mac_ascii Config mac)
 		wan_mac=$(macaddr_add "$lan_mac" 1)
+		label_mac=$lan_mac
+		;;
+	librelink,g9)
+		lan_mac=$(mtd_get_mac_binary factory 0xe000)
+		wan_mac=$(mtd_get_mac_binary factory 0xe006)
 		label_mac=$lan_mac
 		;;
 	netgear,wax214v2)

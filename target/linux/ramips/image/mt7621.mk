@@ -2076,6 +2076,16 @@ define Device/librelink_g5
 endef
 TARGET_DEVICES += librelink_g5
 
+define Device/librelink_g9
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 16000k
+  DEVICE_VENDOR := LibreLink
+  DEVICE_MODEL := Gateway G9
+  DEVICE_PACKAGES := -uboot-envtools
+endef
+TARGET_DEVICES += librelink_g9
+
 define Device/librelink_ac1300_pro
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
