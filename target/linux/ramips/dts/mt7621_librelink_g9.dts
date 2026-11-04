@@ -1,0 +1,380 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+#include "mt7621.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+/ {
+    compatible = "librelink,g9", "mediatek,mt7621-soc";
+    model = "LibreLink Gateway G9";
+
+    chosen {
+        bootargs = "console=ttyS0,115200";
+    };
+
+	keys {
+		compatible = "gpio-keys";
+
+		reset {
+			label = "reset";
+			gpios = <&gpio 7 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RESTART>;
+		};
+	};
+
+    leds {
+        compatible = "gpio-leds";
+
+        red {
+            label = "red";
+            gpios = <&gpio 15 GPIO_ACTIVE_LOW>;
+            default-state = "on";
+            linux,default-trigger = "timer";
+        };
+
+        green {
+            label = "green";
+            gpios = <&gpio 16 GPIO_ACTIVE_LOW>;
+            default-state = "on";
+            linux,default-trigger = "timer";
+        };
+    };
+};
+
+&spi0 {
+	status = "okay";
+
+	flash@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <40000000>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "u-boot";
+				reg = <0x0 0x30000>;
+			};
+
+			partition@30000 {
+				label = "u-boot-env";
+				reg = <0x30000 0x10000>;
+			};
+
+			partition@40000 {
+				label = "factory";
+				reg = <0x40000 0x10000>;
+
+				nvmem-layout {
+					compatible = "fixed-layout";
+					#address-cells = <1>;
+					#size-cells = <1>;
+
+					macaddr_factory_e000: macaddr@e000 {
+						reg = <0xe000 0x6>;
+					};
+
+					macaddr_factory_e006: macaddr@e006 {
+						reg = <0xe006 0x6>;
+					};
+				};
+			};
+
+			partition@50000 {
+				label = "firmware";
+				reg = <0x50000 0xfb0000>;
+				compatible = "denx,uimage";
+			};
+		};
+	};
+};
+
+&i2c {
+	status = "okay";
+};
+
+&pcie {
+	status = "okay";
+};
+
+&ethernet {
+	pinctrl-0 = <&mdio_pins>, <&rgmii1_pins>, <&rgmii2_pins>;
+};
+
+/* Internal PHY at switch port 4 is unused: it is now the RGMII cascade
+   link to the external AN8855H switch, not a PHY. */
+&ethphy4 {
+	status = "disabled";
+};
+
+&gmac0 {
+	status = "okay";
+
+	nvmem-cells = <&macaddr_factory_e000 0>;
+	nvmem-cell-names = "mac-address";
+};
+
+&gmac1 {
+	status = "okay";
+
+	label = "wan";
+	phy-handle = <&an8801r_phy>;
+
+	nvmem-cells = <&macaddr_factory_e006 1>;
+	nvmem-cell-names = "mac-address";
+};
+
+/* MT7621 internal mt7530 switch.
+   ports 0..3 -> LAN1..LAN4 (internal PHYs).
+   port 4 -> RGMII cascade to the external AN8855H switch (CPU/uplink port 5).
+   port 6 -> CPU link to gmac0 (defined in mt7621.dtsi). */
+&switch0 {
+	ports {
+		port@0 {
+			status = "okay";
+			label = "lan1";
+		};
+
+		port@1 {
+			status = "okay";
+			label = "lan2";
+		};
+
+		port@2 {
+			status = "okay";
+			label = "lan3";
+		};
+
+		port@3 {
+			status = "okay";
+			label = "lan4";
+		};
+
+		/* Cascade port to AN8855H. Mirrors the in-tree cross-chip DSA
+		   convention (bcm6328-inteno-xg6846.dts): the downstream switch's
+		   CPU port references this labeled port via
+		   `ethernet = <&switch0port4>`. */
+		switch0port4: port@4 {
+			status = "okay";
+			label = "dsa";
+			phy-mode = "rgmii";
+
+			fixed-link {
+				speed = <1000>;
+				full-duplex;
+			};
+		};
+	};
+};
+
+/* External MDIO bus children: AN8801R (WAN PHY) and AN8855H (5-port switch). */
+&mdio {
+	/* FLAG: AN8801R MDIO address is board-specific. reg <0> chosen to avoid
+	   collision with switch@1f (0x1f) and the AN8855H mfd@1 (reg <1>).
+	   Verify against the board schematic. */
+	an8801r_phy: ethernet-phy@0 {
+		/* FLAG: AN8801R PHY ID is board-specific. The value below is the
+		   AN8801SB-family ID; the "R" variant PHY ID may differ. Verify
+		   with `mdio read` / datasheet. */
+		compatible = "ethernet-phy-idc0ff.0421";
+		reg = <0>;
+		eee-broken-100tx;
+		eee-broken-1000t;
+		/* FLAG: AN8801R reset GPIO unknown - verify and add if required,
+		   e.g. reset-gpios = <&gpio X GPIO_ACTIVE_LOW>; */
+	};
+
+	mfd@1 {
+		compatible = "airoha,an8855-mfd";
+		reg = <1>;
+		status = "okay";
+
+		efuse {
+			compatible = "airoha,an8855-efuse";
+			#nvmem-cell-cells = <0>;
+
+			nvmem-layout {
+				compatible = "fixed-layout";
+				#address-cells = <1>;
+				#size-cells = <1>;
+
+				shift_sel_port0_tx_a: shift-sel-port0-tx-a@c {
+					reg = <0xc 0x4>;
+				};
+
+				shift_sel_port0_tx_b: shift-sel-port0-tx-b@10 {
+					reg = <0x10 0x4>;
+				};
+
+				shift_sel_port0_tx_c: shift-sel-port0-tx-c@14 {
+					reg = <0x14 0x4>;
+				};
+
+				shift_sel_port0_tx_d: shift-sel-port0-tx-d@18 {
+					reg = <0x18 0x4>;
+				};
+
+				shift_sel_port1_tx_a: shift-sel-port1-tx-a@1c {
+					reg = <0x1c 0x4>;
+				};
+
+				shift_sel_port1_tx_b: shift-sel-port1-tx-b@20 {
+					reg = <0x20 0x4>;
+				};
+
+				shift_sel_port1_tx_c: shift-sel-port1-tx-c@24 {
+					reg = <0x24 0x4>;
+				};
+
+				shift_sel_port1_tx_d: shift-sel-port1-tx-d@28 {
+					reg = <0x28 0x4>;
+				};
+
+				shift_sel_port2_tx_a: shift-sel-port2-tx-a@2c {
+					reg = <0x2c 0x4>;
+				};
+
+				shift_sel_port2_tx_b: shift-sel-port2-tx-b@30 {
+					reg = <0x30 0x4>;
+				};
+
+				shift_sel_port2_tx_c: shift-sel-port2-tx-c@34 {
+					reg = <0x34 0x4>;
+				};
+
+				shift_sel_port2_tx_d: shift-sel-port2-tx-d@38 {
+					reg = <0x38 0x4>;
+				};
+
+				shift_sel_port3_tx_a: shift-sel-port3-tx-a@4c {
+					reg = <0x4c 0x4>;
+				};
+
+				shift_sel_port3_tx_b: shift-sel-port3-tx-b@50 {
+					reg = <0x50 0x4>;
+				};
+
+				shift_sel_port3_tx_c: shift-sel-port3-tx-c@54 {
+					reg = <0x54 0x4>;
+				};
+
+				shift_sel_port3_tx_d: shift-sel-port3-tx-d@58 {
+					reg = <0x58 0x4>;
+				};
+			};
+		};
+
+		ethernet-switch {
+			compatible = "airoha,an8855-switch";
+			/* FLAG: AN8855H reset GPIO is a placeholder - verify the
+			   exact GPIO/polarity against the board. */
+			reset-gpios = <&gpio 0 GPIO_ACTIVE_HIGH>;
+
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				port@0 {
+					reg = <0>;
+					label = "lan5";
+					phy-mode = "internal";
+					phy-handle = <&internal_phy1>;
+				};
+
+				port@1 {
+					reg = <1>;
+					label = "lan6";
+					phy-mode = "internal";
+					phy-handle = <&internal_phy2>;
+				};
+
+				port@2 {
+					reg = <2>;
+					label = "lan7";
+					phy-mode = "internal";
+					phy-handle = <&internal_phy3>;
+				};
+
+				port@3 {
+					reg = <3>;
+					label = "lan8";
+					phy-mode = "internal";
+					phy-handle = <&internal_phy4>;
+				};
+
+				/* AN8855 CPU/uplink port (hardcoded =5 in driver),
+				   connected via RGMII to the MT7621 internal switch
+				   port 4. References the labeled upstream cascade port
+				   (switch0port4) per the in-tree cross-chip DSA
+				   convention. */
+				port@5 {
+					reg = <5>;
+					ethernet = <&switch0port4>;
+					phy-mode = "rgmii";
+
+					fixed-link {
+						speed = <1000>;
+						full-duplex;
+						pause;
+					};
+				};
+			};
+		};
+
+		mdio {
+			compatible = "airoha,an8855-mdio";
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			internal_phy1: phy@1 {
+				reg = <1>;
+
+				nvmem-cells = <&shift_sel_port0_tx_a>,
+						<&shift_sel_port0_tx_b>,
+						<&shift_sel_port0_tx_c>,
+						<&shift_sel_port0_tx_d>;
+				nvmem-cell-names = "tx_a", "tx_b", "tx_c", "tx_d";
+			};
+
+			internal_phy2: phy@2 {
+				reg = <2>;
+
+				nvmem-cells = <&shift_sel_port1_tx_a>,
+						<&shift_sel_port1_tx_b>,
+						<&shift_sel_port1_tx_c>,
+						<&shift_sel_port1_tx_d>;
+				nvmem-cell-names = "tx_a", "tx_b", "tx_c", "tx_d";
+			};
+
+			internal_phy3: phy@3 {
+				reg = <3>;
+
+				nvmem-cells = <&shift_sel_port2_tx_a>,
+						<&shift_sel_port2_tx_b>,
+						<&shift_sel_port2_tx_c>,
+						<&shift_sel_port2_tx_d>;
+				nvmem-cell-names = "tx_a", "tx_b", "tx_c", "tx_d";
+			};
+
+			internal_phy4: phy@4 {
+				reg = <4>;
+
+				nvmem-cells = <&shift_sel_port3_tx_a>,
+						<&shift_sel_port3_tx_b>,
+						<&shift_sel_port3_tx_c>,
+						<&shift_sel_port3_tx_d>;
+				nvmem-cell-names = "tx_a", "tx_b", "tx_c", "tx_d";
+			};
+		};
+	};
+};
+
+&state_default {
+	gpio {
+		groups = "wdt", "jtag";
+		function = "gpio";
+	};
+};
