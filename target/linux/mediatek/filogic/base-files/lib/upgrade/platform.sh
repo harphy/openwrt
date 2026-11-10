@@ -381,6 +381,7 @@ platform_check_image() {
 	jcg,q30-pro|\
 	jdcloud,re-cp-03|\
 	konka,komi-a31|\
+	librelink,be3600|\
 	mediatek,mt7981-rfb|\
 	mediatek,mt7988a-rfb|\
 	mercusys,mr90x-v1-ubi|\
