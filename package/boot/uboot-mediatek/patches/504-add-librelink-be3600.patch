@@ -155,7 +155,7 @@
 +boot_tftp_write_fip=tftpboot $loadaddr $bootfile_fip && run mtd_write_fip && run reset_factory
 +boot_tftp_write_bl2=tftpboot $loadaddr $bootfile_bl2 && run mtd_write_bl2
 +check_buttons=if button reset ; then run boot_tftp ; fi
-+ethaddr_factory=mtd read Factory 0x40080000 0x0 0x20000 && env readmem -b ethaddr 0x40080004 0x6 ; setenv ethaddr_factory
++ethaddr_factory=mtd read Factory 0x40080000 0x0 0x20000 && env readmem -b ethaddr 0x4008002a 0x6 ; setenv ethaddr_factory
 +part_default=production
 +part_recovery=recovery
 +reset_factory=ubi part ubi ; mw $loadaddr 0x0 0x800 ; ubi write $loadaddr ubootenv 0x800 ; ubi write $loadaddr ubootenv2 0x800
@@ -202,12 +202,12 @@
 +		compatible = "gpio-leds";
 +
 +		led-0 {
-+			label = "red:status";
++			label = "green:status";
 +			gpios = <&pio 8 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		led-1 {
-+			label = "green:status";
++			label = "red:status";
 +			gpios = <&pio 9 GPIO_ACTIVE_LOW>;
 +		};
 +	};
@@ -296,17 +296,17 @@
 +
 +			partition@180000 {
 +				label = "Factory";
-+				reg = <0x180000 0x200000>;
-+			};
-+
-+			partition@380000 {
-+				label = "FIP";
-+				reg = <0x380000 0x200000>;
++				reg = <0x180000 0x400000>;
 +			};
 +
 +			partition@580000 {
++				label = "FIP";
++				reg = <0x580000 0x200000>;
++			};
++
++			partition@780000 {
 +				label = "ubi";
-+				reg = <0x580000 0x7280000>;
++				reg = <0x780000 0x2000000>;
 +				compatible = "linux,ubi";
 +			};
 +		};

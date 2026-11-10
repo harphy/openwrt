@@ -15,7 +15,7 @@
 		serial0 = &uart0;
 		label-mac-device = &gmac1;
 		led-boot = &led_green;
-		led-failsafe = &led_green;
+		led-failsafe = &led_red;
 		led-running = &led_green;
 		led-upgrade = &led_green;
 	};
@@ -47,14 +47,19 @@
 	leds {
 		compatible = "gpio-leds";
 
-		led_red: led-0 {
-			color = <LED_COLOR_ID_RED>;
+		/*
+		 * GPIO#8/GPIO#9 carry the net names SYS_LED_R/SYS_LED_G but the
+		 * interface doc (GTW07A §2.1.3, §3.1) and the shipping board DTS
+		 * both wire them to the green and the red element respectively.
+		 */
+		led_green: led-0 {
+			color = <LED_COLOR_ID_GREEN>;
 			function = LED_FUNCTION_STATUS;
 			gpios = <&pio 8 GPIO_ACTIVE_LOW>;
 		};
 
-		led_green: led-1 {
-			color = <LED_COLOR_ID_GREEN>;
+		led_red: led-1 {
+			color = <LED_COLOR_ID_RED>;
 			function = LED_FUNCTION_STATUS;
 			gpios = <&pio 9 GPIO_ACTIVE_LOW>;
 		};
@@ -62,6 +67,8 @@
 };
 
 &gmac1 {
+	nvmem-cells = <&macaddr_factory_24>;
+	nvmem-cell-names = "mac-address";
 	openwrt,netdev-name = "wan";
 	phy-mode = "internal";
 	phy-handle = <&phy15>;
@@ -69,6 +76,8 @@
 };
 
 &gmac2 {
+	nvmem-cells = <&macaddr_factory_2a>;
+	nvmem-cell-names = "mac-address";
 	openwrt,netdev-name = "lan";
 	phy-mode = "sgmii";
 	phy-handle = <&an8801_lan>;
@@ -85,14 +94,16 @@
 		pinctrl-names = "i2p5gbe-led";
 	};
 
-	an8801_lan: ethernet-phy@24 {
+	an8801_lan: ethernet-phy@31 {
 		/*
 		 * BE3600 LAN can use AN8801S/EN8801S or AN8801/AN8801SB.
 		 * Keep this as a probed C22 PHY so mounted alternatives such as
 		 * YT8531A can bind to their native driver when present.
+		 * The GPHY address is taken from the switch's own configuration
+		 * (EN8801S strap GPIO#5 = 1, doc §2.3.1), not from the MDIO straps.
 		 */
 		compatible = "ethernet-phy-ieee802.3-c22";
-		reg = <24>;
+		reg = <31>;
 		phy-mode = "sgmii";
 		reset-gpios = <&pio 42 GPIO_ACTIVE_LOW>;
 		reset-assert-us = <10000>;
@@ -116,6 +127,28 @@
 			compatible = "mediatek,mt76";
 			reg = <0x0000 0 0 0 0>;
 			device_type = "pci";
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			/* 2.4G/5G only: single-band antennas, MT7990 6 GHz front-end unpopulated */
+			ieee80211-freq-limit = <2400000 2500000>,
+					       <5170000 5835000>;
+
+			nvmem-cells = <&eeprom_factory_0>;
+			nvmem-cell-names = "eeprom";
+
+			band@0 {
+				reg = <0>;
+				nvmem-cells = <&macaddr_factory_4>;
+				nvmem-cell-names = "mac-address";
+			};
+
+			band@1 {
+				reg = <1>;
+				nvmem-cells = <&macaddr_factory_a>;
+				nvmem-cell-names = "mac-address";
+			};
 		};
 	};
 };
@@ -159,17 +192,45 @@
 
 			factory: partition@180000 {
 				label = "Factory";
-				reg = <0x180000 0x0200000>;
+				reg = <0x180000 0x0400000>;
+				read-only;
+
+				nvmem-layout {
+					compatible = "fixed-layout";
+					#address-cells = <1>;
+					#size-cells = <1>;
+
+					eeprom_factory_0: eeprom@0 {
+						reg = <0x0 0x1e00>;
+					};
+
+					macaddr_factory_4: macaddr@4 {
+						reg = <0x4 0x6>;
+					};
+
+					macaddr_factory_a: macaddr@a {
+						reg = <0xa 0x6>;
+					};
+
+					macaddr_factory_24: macaddr@24 {
+						reg = <0x24 0x6>;
+					};
+
+					macaddr_factory_2a: macaddr@2a {
+						reg = <0x2a 0x6>;
+					};
+				};
 			};
 
-			partition@380000 {
-				label = "FIP";
-				reg = <0x380000 0x0200000>;
-			};
-
+			/* BL2 loads the FIP from 0x580000; keep in sync with its FIP_BASE. */
 			partition@580000 {
+				label = "FIP";
+				reg = <0x580000 0x0200000>;
+			};
+
+			partition@780000 {
 				label = "ubi";
-				reg = <0x0580000 0x07280000>;
+				reg = <0x0780000 0x02000000>;
 				compatible = "linux,ubi";
 
 				volumes {
@@ -186,6 +247,38 @@
 					};
 				};
 			};
+
+			partition@2780000 {
+				label = "ubi1";
+				reg = <0x2780000 0x02000000>;
+			};
+
+			partition@4780000 {
+				label = "cfg";
+				reg = <0x4780000 0x00400000>;
+			};
+
+			partition@4b80000 {
+				label = "cfg_backup";
+				reg = <0x4b80000 0x00400000>;
+			};
+
+			partition@4f80000 {
+				label = "product_info";
+				reg = <0x4f80000 0x00080000>;
+			};
+
+			partition@5000000 {
+				label = "key_log";
+				reg = <0x5000000 0x00400000>;
+			};
+
+			partition@5400000 {
+				label = "plugin";
+				reg = <0x5400000 0x01c00000>;
+			};
+
+			/* 16MB at the end of the flash are left to NMBM */
 		};
 	};
 };
